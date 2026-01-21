@@ -264,3 +264,32 @@ button:hover {
   min-width: 60px;
   text-align: right;
 }
+.ai-btn {
+  background: linear-gradient(45deg, #8b5cf6, #6366f1);
+  color: white;
+}
+
+.ai-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-explanation {
+  background: rgba(139, 92, 246, 0.1);
+  border: 2px solid #8b5cf6;
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  color: white;
+}
+
+.ai-explanation h3 {
+  color: #a78bfa;
+  margin-top: 0;
+}
+
+.explanation-text {
+  line-height: 1.8;
+  white-space: pre-wrap;
+  font-size: 1.05em;
+}

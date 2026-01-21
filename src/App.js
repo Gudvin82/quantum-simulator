@@ -10,6 +10,8 @@ function App() {
   const [numQubits, setNumQubits] = useState(2);
   const [results, setResults] = useState(null);
   const [circuit, setCircuit] = useState([]);
+  const [aiExplanation, setAiExplanation] = useState(null);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   const handleDropGate = (gateName, targetQubit) => {
     const controlQubit = gateName === 'CNOT' ? Math.max(0, targetQubit - 1) : null;
@@ -32,6 +34,7 @@ function App() {
   const handleClear = () => {
     setCircuit([]);
     setResults(null);
+    setAiExplanation(null);
   };
 
   const loadBellState = () => {
@@ -41,27 +44,58 @@ function App() {
       { gate: 'CNOT', target: 1, control: 0 }
     ]);
   };
-const loadSuperposition = () => {
-  setNumQubits(2);
-  setCircuit([
-    { gate: 'H', target: 0, control: null },
-    { gate: 'H', target: 1, control: null }
-  ]);
-};
 
-const loadQuantumNOT = () => {
-  setNumQubits(1);
-  setCircuit([
-    { gate: 'X', target: 0, control: null }
-  ]);
-};
+  const loadSuperposition = () => {
+    setNumQubits(2);
+    setCircuit([
+      { gate: 'H', target: 0, control: null },
+      { gate: 'H', target: 1, control: null }
+    ]);
+  };
+
+  const loadQuantumNOT = () => {
+    setNumQubits(1);
+    setCircuit([
+      { gate: 'X', target: 0, control: null }
+    ]);
+  };
+
+  const handleAIExplain = async () => {
+    if (circuit.length === 0) {
+      alert('Сначала создай квантовую цепь!');
+      return;
+    }
+
+    setIsLoadingAI(true);
+    setAiExplanation(null);
+
+    try {
+      const response = await fetch('/api/aiTutor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ circuit, numQubits })
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setAiExplanation(data.explanation);
+      } else {
+        alert('Ошибка: ' + (data.error || 'Не удалось получить объяснение'));
+      }
+    } catch (error) {
+      alert('Ошибка связи с сервером');
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="App">
         <header>
-          <h1>⚛️ Quantum Simulator v0.5</h1>
-          <p>Drag-and-drop квантовый редактор</p>
+          <h1>⚛️ Quantum Simulator v0.6</h1>
+          <p>Drag-and-drop квантовый редактор с ИИ-тьютором</p>
         </header>
 
         <div className="main-layout">
@@ -81,14 +115,20 @@ const loadQuantumNOT = () => {
 
             <GateToolbar />
             
-           <div className="action-buttons">
-  <button className="run-btn" onClick={handleRun}>▶️ Run</button>
-  <button className="clear-btn" onClick={handleClear}>🗑️ Clear</button>
-  <button className="example-btn" onClick={loadBellState}>📚 Bell State</button>
-  <button className="example-btn" onClick={loadSuperposition}>🌀 Superposition</button>
-  <button className="example-btn" onClick={loadQuantumNOT}>↔️ Quantum NOT</button>
-</div>
-
+            <div className="action-buttons">
+              <button className="run-btn" onClick={handleRun}>▶️ Run</button>
+              <button className="clear-btn" onClick={handleClear}>🗑️ Clear</button>
+              <button className="example-btn" onClick={loadBellState}>📚 Bell State</button>
+              <button className="example-btn" onClick={loadSuperposition}>🌀 Superposition</button>
+              <button className="example-btn" onClick={loadQuantumNOT}>↔️ Quantum NOT</button>
+              <button 
+                className="ai-btn" 
+                onClick={handleAIExplain}
+                disabled={isLoadingAI}
+              >
+                {isLoadingAI ? '🔄 Думаю...' : '🧠 Объясни цепь'}
+              </button>
+            </div>
           </div>
 
           <div className="main-area">
@@ -99,29 +139,37 @@ const loadQuantumNOT = () => {
               onDropGate={handleDropGate}
             />
 
-{results && (
-  <div className="results">
-    <h3>📊 Результаты измерения:</h3>
-    <div className="probability-bars">
-      {Object.entries(results).map(([state, prob]) => {
-        const percentage = parseFloat(prob);
-        return (
-          <div key={state} className="prob-item">
-            <span className="state-label">{state}</span>
-            <div className="prob-bar-container">
-              <div 
-                className="prob-bar" 
-                style={{ width: `${percentage}%` }}
-              ></div>
-            </div>
-            <span className="prob-value">{prob}</span>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
+            {aiExplanation && (
+              <div className="ai-explanation">
+                <h3>🧠 ИИ-тьютор объясняет:</h3>
+                <div className="explanation-text">
+                  {aiExplanation}
+                </div>
+              </div>
+            )}
 
+            {results && (
+              <div className="results">
+                <h3>📊 Результаты измерения:</h3>
+                <div className="probability-bars">
+                  {Object.entries(results).map(([state, prob]) => {
+                    const percentage = parseFloat(prob);
+                    return (
+                      <div key={state} className="prob-item">
+                        <span className="state-label">{state}</span>
+                        <div className="prob-bar-container">
+                          <div 
+                            className="prob-bar" 
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                        <span className="prob-value">{prob}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
