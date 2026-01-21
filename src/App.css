@@ -227,3 +227,40 @@ button:hover {
     width: 100%;
   }
 }
+.probability-bars {
+  margin-top: 15px;
+}
+
+.prob-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.state-label {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #667eea;
+  min-width: 60px;
+}
+
+.prob-bar-container {
+  flex: 1;
+  height: 30px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.prob-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.5s ease;
+}
+
+.prob-value {
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}

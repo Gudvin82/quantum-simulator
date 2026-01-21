@@ -41,6 +41,20 @@ function App() {
       { gate: 'CNOT', target: 1, control: 0 }
     ]);
   };
+const loadSuperposition = () => {
+  setNumQubits(2);
+  setCircuit([
+    { gate: 'H', target: 0, control: null },
+    { gate: 'H', target: 1, control: null }
+  ]);
+};
+
+const loadQuantumNOT = () => {
+  setNumQubits(1);
+  setCircuit([
+    { gate: 'X', target: 0, control: null }
+  ]);
+};
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -67,11 +81,14 @@ function App() {
 
             <GateToolbar />
             
-            <div className="action-buttons">
-              <button className="run-btn" onClick={handleRun}>▶️ Run</button>
-              <button className="clear-btn" onClick={handleClear}>🗑️ Clear</button>
-              <button className="example-btn" onClick={loadBellState}>📚 Bell State</button>
-            </div>
+           <div className="action-buttons">
+  <button className="run-btn" onClick={handleRun}>▶️ Run</button>
+  <button className="clear-btn" onClick={handleClear}>🗑️ Clear</button>
+  <button className="example-btn" onClick={loadBellState}>📚 Bell State</button>
+  <button className="example-btn" onClick={loadSuperposition}>🌀 Superposition</button>
+  <button className="example-btn" onClick={loadQuantumNOT}>↔️ Quantum NOT</button>
+</div>
+
           </div>
 
           <div className="main-area">
@@ -82,18 +99,29 @@ function App() {
               onDropGate={handleDropGate}
             />
 
-            {results && (
-              <div className="results">
-                <h3>📊 Результаты измерения:</h3>
-                <ul>
-                  {Object.entries(results).map(([state, prob]) => (
-                    <li key={state}>
-                      <strong>{state}</strong>: {prob}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+{results && (
+  <div className="results">
+    <h3>📊 Результаты измерения:</h3>
+    <div className="probability-bars">
+      {Object.entries(results).map(([state, prob]) => {
+        const percentage = parseFloat(prob);
+        return (
+          <div key={state} className="prob-item">
+            <span className="state-label">{state}</span>
+            <div className="prob-bar-container">
+              <div 
+                className="prob-bar" 
+                style={{ width: `${percentage}%` }}
+              ></div>
+            </div>
+            <span className="prob-value">{prob}</span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
           </div>
         </div>
       </div>
